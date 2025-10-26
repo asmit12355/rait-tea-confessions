@@ -14,7 +14,103 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      confession_comments: {
+        Row: {
+          author_name: string
+          confession_id: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          author_name: string
+          confession_id: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          confession_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "confession_comments_confession_id_fkey"
+            columns: ["confession_id"]
+            isOneToOne: false
+            referencedRelation: "confessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      confession_votes: {
+        Row: {
+          confession_id: string
+          created_at: string
+          id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          confession_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          confession_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "confession_votes_confession_id_fkey"
+            columns: ["confession_id"]
+            isOneToOne: false
+            referencedRelation: "confessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      confessions: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author_name: string
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
