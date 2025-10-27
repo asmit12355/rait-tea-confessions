@@ -24,21 +24,17 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
     setLoading(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
+      // Anonymous posting - no login required
       const { error } = await supabase.from("confessions").insert({
-        user_id: user.id,
-        author_name: pseudonym,
+        user_id: null, // Anonymous
+        author_name: pseudonym || "Anonymous",
         title,
         content,
       });
 
       if (error) throw error;
 
-      toast({ title: "Confession posted!" });
+      toast({ title: "Confession posted successfully!" });
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -70,13 +66,12 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="pseudonym">Pseudonym</Label>
+              <Label htmlFor="pseudonym">Pseudonym (Optional)</Label>
               <Input
                 id="pseudonym"
-                placeholder="Anonymous Student"
+                placeholder="Anonymous"
                 value={pseudonym}
                 onChange={(e) => setPseudonym(e.target.value)}
-                required
                 className="bg-secondary border-border"
               />
             </div>

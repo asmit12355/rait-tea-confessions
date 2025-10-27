@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageCircle, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ConfessionCardProps {
   id: string;
@@ -23,15 +24,26 @@ const ConfessionCard = ({
 }: ConfessionCardProps) => {
   const [upvotes, setUpvotes] = useState(0);
   const [downvotes, setDownvotes] = useState(0);
-  const [comments, setComments] = useState(0);
+  const [commentsList, setCommentsList] = useState<any[]>([]);
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [commentPseudonym, setCommentPseudonym] = useState("");
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [voteIdentifier, setVoteIdentifier] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
+    // Generate or get vote identifier for anonymous voting
+    let identifier = localStorage.getItem("vote_identifier");
+    if (!identifier) {
+      identifier = `anon_${Math.random().toString(36).substring(2, 15)}`;
+      localStorage.setItem("vote_identifier", identifier);
+    }
+    setVoteIdentifier(identifier);
+    
     loadVotes();
     loadComments();
-    checkUserVote();
+    checkUserVote(identifier);
   }, [id]);
 
   const loadVotes = async () => {
@@ -47,28 +59,22 @@ const ConfessionCard = ({
   };
 
   const loadComments = async () => {
-    const { count } = await supabase
+    const { data } = await supabase
       .from("confession_comments")
-      .select("*", { count: "exact", head: true })
-      .eq("confession_id", id);
+      .select("*")
+      .eq("confession_id", id)
+      .order("created_at", { ascending: false });
 
-    setComments(count || 0);
+    setCommentsList(data || []);
   };
 
-  const checkUserVote = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    setUserId(user.id);
-
+  const checkUserVote = async (identifier: string) => {
     const { data } = await supabase
       .from("confession_votes")
       .select("vote_type")
       .eq("confession_id", id)
-      .eq("user_id", user.id)
-      .single();
+      .eq("vote_identifier", identifier)
+      .maybeSingle();
 
     if (data) {
       setUserVote(data.vote_type as "upvote" | "downvote");
@@ -76,15 +82,6 @@ const ConfessionCard = ({
   };
 
   const handleVote = async (type: "upvote" | "downvote") => {
-    if (!userId) {
-      toast({
-        title: "Login required",
-        description: "Please log in to vote",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       if (userVote === type) {
         // Remove vote
@@ -92,18 +89,30 @@ const ConfessionCard = ({
           .from("confession_votes")
           .delete()
           .eq("confession_id", id)
-          .eq("user_id", userId);
+          .eq("vote_identifier", voteIdentifier);
         setUserVote(null);
       } else {
         // Add or update vote
-        await supabase.from("confession_votes").upsert(
-          {
+        const { data: existing } = await supabase
+          .from("confession_votes")
+          .select("id")
+          .eq("confession_id", id)
+          .eq("vote_identifier", voteIdentifier)
+          .maybeSingle();
+
+        if (existing) {
+          await supabase
+            .from("confession_votes")
+            .update({ vote_type: type })
+            .eq("id", existing.id);
+        } else {
+          await supabase.from("confession_votes").insert({
             confession_id: id,
-            user_id: userId,
+            user_id: null,
             vote_type: type,
-          },
-          { onConflict: "confession_id,user_id" }
-        );
+            vote_identifier: voteIdentifier,
+          });
+        }
         setUserVote(type);
       }
       loadVotes();
@@ -113,6 +122,55 @@ const ConfessionCard = ({
         description: error.message,
         variant: "destructive",
       });
+    }
+  };
+
+  const handleComment = async () => {
+    if (!newComment.trim()) return;
+
+    try {
+      await supabase.from("confession_comments").insert({
+        confession_id: id,
+        user_id: null,
+        author_name: commentPseudonym || "Anonymous",
+        content: newComment,
+      });
+
+      setNewComment("");
+      setCommentPseudonym("");
+      loadComments();
+      toast({ title: "Comment posted!" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const shareData = {
+        title: title,
+        text: `${title}\n\n${content}`,
+        url: window.location.href,
+      };
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${title}\n\n${content}\n\n${window.location.href}`);
+        toast({ title: "Copied to clipboard!" });
+      }
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        toast({
+          title: "Error sharing",
+          description: "Could not share this confession",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -137,8 +195,8 @@ const ConfessionCard = ({
               variant="ghost"
               size="sm"
               onClick={() => handleVote("upvote")}
-              className={`gap-2 hover:text-primary transition-colors ${
-                userVote === "upvote" ? "text-primary" : ""
+              className={`gap-2 transition-colors ${
+                userVote === "upvote" ? "text-green-500 hover:text-green-600" : "hover:text-green-500"
               }`}
             >
               <ThumbsUp className="h-4 w-4" />
@@ -148,8 +206,8 @@ const ConfessionCard = ({
               variant="ghost"
               size="sm"
               onClick={() => handleVote("downvote")}
-              className={`gap-2 hover:text-destructive transition-colors ${
-                userVote === "downvote" ? "text-destructive" : ""
+              className={`gap-2 transition-colors ${
+                userVote === "downvote" ? "text-red-500 hover:text-red-600" : "hover:text-red-500"
               }`}
             >
               <ThumbsDown className="h-4 w-4" />
@@ -157,11 +215,63 @@ const ConfessionCard = ({
             </Button>
           </div>
 
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-sm">{comments}</span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowComments(!showComments)}
+              className="gap-2 text-yellow-600 hover:text-yellow-700"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-sm">{commentsList.length}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleShare}
+              className="gap-2 hover:text-primary"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
+
+        {showComments && (
+          <div className="space-y-4 pt-4 border-t border-border">
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="Your pseudonym (optional)"
+                value={commentPseudonym}
+                onChange={(e) => setCommentPseudonym(e.target.value)}
+                className="w-full px-3 py-2 bg-secondary border-border rounded-md text-sm"
+              />
+              <Textarea
+                placeholder="Write a comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="bg-secondary border-border"
+              />
+              <Button onClick={handleComment} size="sm" className="w-full">
+                Post Comment
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {commentsList.map((comment) => (
+                <div key={comment.id} className="bg-secondary/50 p-3 rounded-md">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                    <span className="italic">{comment.author_name}</span>
+                    <span>
+                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                  <p className="text-sm">{comment.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   );
