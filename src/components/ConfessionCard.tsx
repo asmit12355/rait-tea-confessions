@@ -185,8 +185,8 @@ const ConfessionCard = ({
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-3">{title}</h2>
-          <p className="text-muted-foreground leading-relaxed">{content}</p>
+          <h2 className="text-xl font-semibold mb-3 font-typewriter">{title}</h2>
+          <p className="text-muted-foreground leading-relaxed font-typewriter">{content}</p>
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-border">

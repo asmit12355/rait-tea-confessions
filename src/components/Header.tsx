@@ -89,20 +89,13 @@ const Header = ({ onPostClick }: HeaderProps) => {
                 Admin
               </Button>
             )}
-            {user ? (
+            {user && (
               <Button
                 onClick={handleSignOut}
                 variant="outline"
                 className="border-border"
               >
                 Sign Out
-              </Button>
-            ) : (
-              <Button
-                onClick={() => navigate("/auth")}
-                variant="ghost"
-              >
-                Admin Sign In
               </Button>
             )}
           </div>

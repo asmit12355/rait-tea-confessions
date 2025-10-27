@@ -24,10 +24,13 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
     setLoading(true);
 
     try {
+      const randomNumber = Math.floor(Math.random() * 10000);
+      const authorName = pseudonym.trim() || `Anonymous User #${randomNumber}`;
+      
       // Anonymous posting - no login required
       const { error } = await supabase.from("confessions").insert({
         user_id: null, // Anonymous
-        author_name: pseudonym || "Anonymous",
+        author_name: authorName,
         title,
         content,
       });
@@ -69,7 +72,7 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
               <Label htmlFor="pseudonym">Pseudonym (Optional)</Label>
               <Input
                 id="pseudonym"
-                placeholder="Anonymous"
+                placeholder="Leave empty for Anonymous User #[number]"
                 value={pseudonym}
                 onChange={(e) => setPseudonym(e.target.value)}
                 className="bg-secondary border-border"
