@@ -58,7 +58,7 @@ const Header = ({ onPostClick }: HeaderProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
             <img src={teaLogo} alt="Tea Cup" className="h-10 w-10 opacity-90" />
-            <h1 className="text-2xl font-semibold">RAIT Confession Tea</h1>
+            <h1 className="text-2xl font-semibold font-display">RAIT Confession Tea</h1>
           </div>
 
           <div className="flex items-center gap-3">

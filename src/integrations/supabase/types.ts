@@ -21,6 +21,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          ip_address: string | null
           user_id: string | null
         }
         Insert: {
@@ -29,6 +30,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           user_id?: string | null
         }
         Update: {
@@ -37,6 +39,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -54,6 +57,7 @@ export type Database = {
           confession_id: string
           created_at: string
           id: string
+          ip_address: string | null
           reason: string
           reporter_identifier: string | null
         }
@@ -61,6 +65,7 @@ export type Database = {
           confession_id: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           reason: string
           reporter_identifier?: string | null
         }
@@ -68,6 +73,7 @@ export type Database = {
           confession_id?: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           reason?: string
           reporter_identifier?: string | null
         }
@@ -122,6 +128,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          ip_address: string | null
           title: string
           updated_at: string
           user_id: string | null
@@ -131,6 +138,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
@@ -140,6 +148,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null

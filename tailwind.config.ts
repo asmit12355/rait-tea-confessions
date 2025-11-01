@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Times New Roman', 'Arial', 'serif'],
+        sans: ['Lora', 'Georgia', 'serif'],
+        display: ['Playfair Display', 'Georgia', 'serif'],
         mono: ['IBM Plex Mono', 'monospace'],
       },
       colors: {

@@ -207,13 +207,15 @@ const ConfessionCard = ({
         <div>
           <h2 className="text-xl font-semibold mb-3 font-mono text-center">{title}</h2>
           <p className="text-muted-foreground leading-relaxed font-mono">{truncateContent(content)}</p>
-          <Button
-            variant="link"
-            onClick={() => navigate(`/confession/${id}`)}
-            className="mt-2 p-0 h-auto text-primary"
-          >
-            View Full Post
-          </Button>
+          <div className="flex justify-center mt-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/confession/${id}`)}
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            >
+              View Full Post
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-border">
