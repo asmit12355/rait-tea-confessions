@@ -1,10 +1,22 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, ThumbsDown, MessageCircle, Share2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageCircle, Share2, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 
 interface ConfessionCardProps {
@@ -22,14 +34,13 @@ const ConfessionCard = ({
   title,
   content,
 }: ConfessionCardProps) => {
+  const navigate = useNavigate();
   const [upvotes, setUpvotes] = useState(0);
   const [downvotes, setDownvotes] = useState(0);
   const [commentsList, setCommentsList] = useState<any[]>([]);
-  const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  const [commentPseudonym, setCommentPseudonym] = useState("");
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
   const [voteIdentifier, setVoteIdentifier] = useState<string>("");
+  const [reportReason, setReportReason] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,9 +72,8 @@ const ConfessionCard = ({
   const loadComments = async () => {
     const { data } = await supabase
       .from("confession_comments")
-      .select("*")
-      .eq("confession_id", id)
-      .order("created_at", { ascending: false });
+      .select("id")
+      .eq("confession_id", id);
 
     setCommentsList(data || []);
   };
@@ -125,21 +135,25 @@ const ConfessionCard = ({
     }
   };
 
-  const handleComment = async () => {
-    if (!newComment.trim()) return;
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a reason for reporting",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      await supabase.from("confession_comments").insert({
+      await supabase.from("confession_reports").insert({
         confession_id: id,
-        user_id: null,
-        author_name: commentPseudonym || "Anonymous",
-        content: newComment,
+        reason: reportReason,
+        reporter_identifier: voteIdentifier,
       });
 
-      setNewComment("");
-      setCommentPseudonym("");
-      loadComments();
-      toast({ title: "Comment posted!" });
+      setReportReason("");
+      toast({ title: "Report submitted. Thank you!" });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -151,16 +165,17 @@ const ConfessionCard = ({
 
   const handleShare = async () => {
     try {
+      const shareUrl = `${window.location.origin}/confession/${id}`;
       const shareData = {
         title: title,
-        text: `${title}\n\n${content}`,
-        url: window.location.href,
+        text: `${title}\n\n${content.substring(0, 100)}...`,
+        url: shareUrl,
       };
 
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        await navigator.clipboard.writeText(`${title}\n\n${content}\n\n${window.location.href}`);
+        await navigator.clipboard.writeText(`${title}\n\n${content}\n\n${shareUrl}`);
         toast({ title: "Copied to clipboard!" });
       }
     } catch (error: any) {
@@ -174,6 +189,11 @@ const ConfessionCard = ({
     }
   };
 
+  const truncateContent = (text: string, maxLength: number = 200) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
+
   return (
     <Card className="p-6 bg-card border-border hover:border-primary/30 transition-all duration-300">
       <div className="space-y-4">
@@ -185,8 +205,15 @@ const ConfessionCard = ({
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-3 font-typewriter">{title}</h2>
-          <p className="text-muted-foreground leading-relaxed font-typewriter">{content}</p>
+          <h2 className="text-xl font-semibold mb-3 font-mono text-center">{title}</h2>
+          <p className="text-muted-foreground leading-relaxed font-mono">{truncateContent(content)}</p>
+          <Button
+            variant="link"
+            onClick={() => navigate(`/confession/${id}`)}
+            className="mt-2 p-0 h-auto text-primary"
+          >
+            View Full Post
+          </Button>
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-border">
@@ -219,7 +246,7 @@ const ConfessionCard = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowComments(!showComments)}
+              onClick={() => navigate(`/confession/${id}`)}
               className="gap-2 text-yellow-600 hover:text-yellow-700"
             >
               <MessageCircle className="h-4 w-4" />
@@ -233,45 +260,38 @@ const ConfessionCard = ({
             >
               <Share2 className="h-4 w-4" />
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 hover:text-destructive"
+                >
+                  <Flag className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Report Confession</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Please provide a reason for reporting this confession.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <Textarea
+                  placeholder="Reason for reporting..."
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="bg-secondary border-border"
+                />
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReport}>Submit Report</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
-        {showComments && (
-          <div className="space-y-4 pt-4 border-t border-border">
-            <div className="space-y-2">
-              <input
-                type="text"
-                placeholder="Your pseudonym (optional)"
-                value={commentPseudonym}
-                onChange={(e) => setCommentPseudonym(e.target.value)}
-                className="w-full px-3 py-2 bg-secondary border-border rounded-md text-sm"
-              />
-              <Textarea
-                placeholder="Write a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="bg-secondary border-border"
-              />
-              <Button onClick={handleComment} size="sm" className="w-full">
-                Post Comment
-              </Button>
-            </div>
-
-            <div className="space-y-3">
-              {commentsList.map((comment) => (
-                <div key={comment.id} className="bg-secondary/50 p-3 rounded-md">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                    <span className="italic">{comment.author_name}</span>
-                    <span>
-                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                    </span>
-                  </div>
-                  <p className="text-sm">{comment.content}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </Card>
   );

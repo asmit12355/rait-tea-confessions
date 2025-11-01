@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Trending from "./pages/Trending";
 import Admin from "./pages/Admin";
+import ConfessionDetail from "./pages/ConfessionDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/confession/:id" element={<ConfessionDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
