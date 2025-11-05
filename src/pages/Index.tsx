@@ -58,10 +58,10 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onPostClick={() => setShowForm(true)} />
 
-      <main className="container px-4 py-12 md:px-6">
-        <div className="mx-auto max-w-3xl space-y-8">
-          <div className="text-center space-y-3 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">Recent Secrets</h2>
+      <main className="container px-3 py-6 md:px-6 md:py-12">
+        <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
+          <div className="text-center space-y-2 md:space-y-3 mb-8 md:mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display">Recent Secrets</h2>
           </div>
 
           {loading ? (

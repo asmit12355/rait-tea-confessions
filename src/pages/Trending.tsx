@@ -94,11 +94,11 @@ const Trending = () => {
     <div className="min-h-screen bg-background">
       <Header onPostClick={() => setShowForm(true)} />
 
-      <main className="container px-4 py-12 md:px-6">
-        <div className="mx-auto max-w-3xl space-y-8">
-          <div className="text-center space-y-3 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">🔥 Trending Confessions</h2>
-            <p className="text-muted-foreground">
+      <main className="container px-3 py-6 md:px-6 md:py-12">
+        <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
+          <div className="text-center space-y-2 md:space-y-3 mb-8 md:mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display">🔥 Trending Confessions</h2>
+            <p className="text-sm md:text-base text-muted-foreground">
               Most popular confessions based on votes
             </p>
           </div>
@@ -114,7 +114,7 @@ const Trending = () => {
               {confessions.map((confession, index) => (
                 <div key={confession.id} className="relative">
                   {index < 3 && (
-                    <div className="absolute -left-8 top-6 text-2xl">
+                    <div className="absolute -left-4 md:-left-8 top-4 md:top-6 text-xl md:text-2xl">
                       {index === 0 && "🥇"}
                       {index === 1 && "🥈"}
                       {index === 2 && "🥉"}

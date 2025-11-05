@@ -146,22 +146,24 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <Header onPostClick={() => {}} />
 
-      <main className="container px-4 py-12 md:px-6">
-        <div className="mx-auto max-w-6xl space-y-8">
-          <div className="text-center space-y-3 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-display">🔒 Admin Dashboard</h2>
-            <p className="text-muted-foreground">
+      <main className="container px-3 py-6 md:px-6 md:py-12">
+        <div className="mx-auto max-w-6xl space-y-6 md:space-y-8">
+          <div className="text-center space-y-2 md:space-y-3 mb-8 md:mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display">🔒 Admin Dashboard</h2>
+            <p className="text-sm md:text-base text-muted-foreground">
               Monitor and manage all confessions and reports
             </p>
           </div>
 
-          <Tabs defaultValue="confessions" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue="confessions" className="space-y-4 md:space-y-6">
+            <TabsList className="grid w-full grid-cols-2 text-sm md:text-base">
               <TabsTrigger value="confessions">
-                Confessions ({confessions.length})
+                <span className="hidden sm:inline">Confessions ({confessions.length})</span>
+                <span className="sm:hidden">📝 ({confessions.length})</span>
               </TabsTrigger>
               <TabsTrigger value="reports">
-                Reports ({reports.length})
+                <span className="hidden sm:inline">Reports ({reports.length})</span>
+                <span className="sm:hidden">🚩 ({reports.length})</span>
               </TabsTrigger>
             </TabsList>
 
@@ -175,11 +177,11 @@ const Admin = () => {
               ) : (
                 <div className="space-y-4">
                   {confessions.map((confession) => (
-                    <Card key={confession.id} className="p-6 bg-card border-border">
-                      <div className="space-y-4">
-                        <div className="flex items-start justify-between">
+                    <Card key={confession.id} className="p-3 md:p-6 bg-card border-border">
+                      <div className="space-y-3 md:space-y-4">
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
+                            <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-muted-foreground mb-2">
                               <span className="italic">{confession.author_name}</span>
                               <span>•</span>
                               <span>
@@ -189,34 +191,36 @@ const Admin = () => {
                               </span>
                               {confession.ip_address && (
                                 <>
-                                  <span>•</span>
-                                  <span className="font-mono text-xs bg-secondary px-2 py-1 rounded">
+                                  <span className="hidden sm:inline">•</span>
+                                  <span className="font-mono text-[10px] md:text-xs bg-secondary px-2 py-1 rounded">
                                     IP: {confession.ip_address}
                                   </span>
                                 </>
                               )}
                             </div>
-                            <h3 className="text-xl font-semibold mb-2 font-mono">
+                            <h3 className="text-base md:text-xl font-semibold mb-2 font-mono">
                               {confession.title}
                             </h3>
-                            <p className="text-muted-foreground leading-relaxed font-mono">
+                            <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-mono line-clamp-3">
                               {confession.content}
                             </p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 self-end md:self-start">
                             <Button
                               variant="outline"
                               size="icon"
                               onClick={() => navigate(`/confession/${confession.id}`)}
+                              className="h-8 w-8 md:h-10 md:w-10"
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                             <Button
                               variant="destructive"
                               size="icon"
                               onClick={() => handleDelete(confession.id)}
+                              className="h-8 w-8 md:h-10 md:w-10"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           </div>
                         </div>
@@ -235,43 +239,43 @@ const Admin = () => {
               ) : (
                 <div className="space-y-4">
                   {reports.map((report) => (
-                    <Card key={report.id} className="p-6 bg-card border-border border-l-4 border-l-destructive">
-                      <div className="space-y-4">
-                        <div className="flex items-start justify-between">
+                    <Card key={report.id} className="p-3 md:p-6 bg-card border-border border-l-4 border-l-destructive">
+                      <div className="space-y-3 md:space-y-4">
+                        <div className="flex flex-col gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-3">
-                              <AlertTriangle className="h-5 w-5 text-destructive" />
-                              <h3 className="text-lg font-semibold">Report</h3>
+                              <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
+                              <h3 className="text-base md:text-lg font-semibold font-display">Report</h3>
                             </div>
                             
                             {report.confessions && (
-                              <div className="mb-3 p-3 bg-secondary/50 rounded-md">
-                                <p className="text-sm text-muted-foreground mb-1">Reported Confession:</p>
-                                <p className="font-semibold font-mono">{report.confessions.title}</p>
-                                <p className="text-sm text-muted-foreground mt-1">by {report.confessions.author_name}</p>
+                              <div className="mb-3 p-2 md:p-3 bg-secondary/50 rounded-md">
+                                <p className="text-xs md:text-sm text-muted-foreground mb-1">Reported Confession:</p>
+                                <p className="text-sm md:text-base font-semibold font-mono">{report.confessions.title}</p>
+                                <p className="text-xs md:text-sm text-muted-foreground mt-1">by {report.confessions.author_name}</p>
                               </div>
                             )}
 
                             <div className="space-y-2">
                               <div>
-                                <p className="text-sm text-muted-foreground">Reason:</p>
-                                <p className="text-foreground">{report.reason}</p>
+                                <p className="text-xs md:text-sm text-muted-foreground">Reason:</p>
+                                <p className="text-sm md:text-base text-foreground">{report.reason}</p>
                               </div>
                               
-                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-muted-foreground">
                                 <span>
                                   {formatDistanceToNow(new Date(report.created_at), {
                                     addSuffix: true,
                                   })}
                                 </span>
                                 <span>•</span>
-                                <span className="font-mono text-xs">
-                                  Reporter: {report.reporter_identifier.substring(0, 12)}...
+                                <span className="font-mono text-[10px] md:text-xs">
+                                  Reporter: {report.reporter_identifier.substring(0, 8)}...
                                 </span>
                                 {report.ip_address && (
                                   <>
-                                    <span>•</span>
-                                    <span className="font-mono text-xs bg-destructive/20 px-2 py-1 rounded">
+                                    <span className="hidden sm:inline">•</span>
+                                    <span className="font-mono text-[10px] md:text-xs bg-destructive/20 px-2 py-1 rounded">
                                       IP: {report.ip_address}
                                     </span>
                                   </>
@@ -280,25 +284,30 @@ const Admin = () => {
                             </div>
                           </div>
                           
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <Button
                               variant="outline"
-                              size="icon"
+                              size="sm"
                               onClick={() => navigate(`/confession/${report.confession_id}`)}
+                              className="text-xs md:text-sm"
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                              View
                             </Button>
                             <Button
                               variant="destructive"
-                              size="icon"
+                              size="sm"
                               onClick={() => handleDelete(report.confession_id)}
+                              className="text-xs md:text-sm"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                              Delete
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteReport(report.id)}
+                              className="text-xs md:text-sm"
                             >
                               Dismiss
                             </Button>

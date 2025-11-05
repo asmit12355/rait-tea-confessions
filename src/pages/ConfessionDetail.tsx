@@ -245,19 +245,20 @@ const ConfessionDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header onPostClick={() => navigate("/")} />
-      <div className="container py-8 max-w-4xl">
+      <div className="container py-4 md:py-8 px-3 md:px-6 max-w-4xl">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-4 gap-2"
+          className="mb-3 md:mb-4 gap-2 text-sm md:text-base"
+          size="sm"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-3 w-3 md:h-4 md:w-4" />
           Back
         </Button>
 
-        <Card className="p-6 bg-card border-border">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm">
+        <Card className="p-4 md:p-6 bg-card border-border">
+          <div className="space-y-3 md:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs md:text-sm">
               <p className="text-muted-foreground italic">{confession.author_name}</p>
               <p className="text-muted-foreground">
                 {formatDistanceToNow(new Date(confession.created_at), { addSuffix: true })}
@@ -265,67 +266,67 @@ const ConfessionDetail = () => {
             </div>
 
             <div>
-              <h1 className="text-2xl font-semibold mb-4 font-mono text-center">{confession.title}</h1>
-              <p className="text-muted-foreground leading-relaxed font-mono whitespace-pre-wrap">{confession.content}</p>
+              <h1 className="text-xl md:text-2xl font-semibold mb-3 md:mb-4 font-mono text-center">{confession.title}</h1>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-mono whitespace-pre-wrap">{confession.content}</p>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-border">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 md:pt-4 border-t border-border">
+              <div className="flex items-center gap-1 md:gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleVote("upvote")}
-                  className={`gap-2 transition-colors ${
+                  className={`gap-1 md:gap-2 transition-colors text-xs md:text-sm ${
                     userVote === "upvote" ? "text-green-500 hover:text-green-600" : "hover:text-green-500"
                   }`}
                 >
-                  <ThumbsUp className="h-4 w-4" />
-                  <span className="text-sm">{upvotes}</span>
+                  <ThumbsUp className="h-3 w-3 md:h-4 md:w-4" />
+                  <span>{upvotes}</span>
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleVote("downvote")}
-                  className={`gap-2 transition-colors ${
+                  className={`gap-1 md:gap-2 transition-colors text-xs md:text-sm ${
                     userVote === "downvote" ? "text-red-500 hover:text-red-600" : "hover:text-red-500"
                   }`}
                 >
-                  <ThumbsDown className="h-4 w-4" />
-                  <span className="text-sm">{downvotes}</span>
+                  <ThumbsDown className="h-3 w-3 md:h-4 md:w-4" />
+                  <span>{downvotes}</span>
                 </Button>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-2 text-yellow-600 hover:text-yellow-700"
+                  className="gap-1 md:gap-2 text-yellow-600 hover:text-yellow-700 text-xs md:text-sm"
                 >
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="text-sm">{commentsList.length}</span>
+                  <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
+                  <span>{commentsList.length}</span>
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleShare}
-                  className="gap-2 hover:text-primary"
+                  className="gap-1 md:gap-2 hover:text-primary"
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="gap-2 hover:text-destructive"
+                      className="gap-1 md:gap-2 hover:text-destructive"
                     >
-                      <Flag className="h-4 w-4" />
+                      <Flag className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Report Confession</AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogTitle className="text-base md:text-lg">Report Confession</AlertDialogTitle>
+                      <AlertDialogDescription className="text-sm md:text-base">
                         Please provide a reason for reporting this confession.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -333,48 +334,49 @@ const ConfessionDetail = () => {
                       placeholder="Reason for reporting..."
                       value={reportReason}
                       onChange={(e) => setReportReason(e.target.value)}
-                      className="bg-secondary border-border"
+                      className="bg-secondary border-border text-sm md:text-base"
                     />
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleReport}>Submit Report</AlertDialogAction>
+                      <AlertDialogCancel className="text-sm md:text-base">Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleReport} className="text-sm md:text-base">Submit Report</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-border">
-              <h3 className="font-semibold">Comments</h3>
+            <div className="space-y-3 md:space-y-4 pt-3 md:pt-4 border-t border-border">
+              <h3 className="font-semibold text-base md:text-lg font-display">Comments</h3>
               <div className="space-y-2">
                 <input
                   type="text"
                   placeholder="Your pseudonym (optional)"
                   value={commentPseudonym}
                   onChange={(e) => setCommentPseudonym(e.target.value)}
-                  className="w-full px-3 py-2 bg-secondary border-border rounded-md text-sm"
+                  className="w-full px-3 py-2 bg-secondary border-border rounded-md text-xs md:text-sm"
                 />
                 <Textarea
                   placeholder="Write a comment..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  className="bg-secondary border-border"
+                  className="bg-secondary border-border text-sm md:text-base"
+                  rows={3}
                 />
-                <Button onClick={handleComment} size="sm" className="w-full">
+                <Button onClick={handleComment} size="sm" className="w-full text-sm md:text-base">
                   Post Comment
                 </Button>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {commentsList.map((comment) => (
-                  <div key={comment.id} className="bg-secondary/50 p-3 rounded-md">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                  <div key={comment.id} className="bg-secondary/50 p-2 md:p-3 rounded-md">
+                    <div className="flex items-center justify-between text-[10px] md:text-xs text-muted-foreground mb-1">
                       <span className="italic">{comment.author_name}</span>
                       <span>
                         {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                       </span>
                     </div>
-                    <p className="text-sm">{comment.content}</p>
+                    <p className="text-xs md:text-sm">{comment.content}</p>
                   </div>
                 ))}
               </div>
