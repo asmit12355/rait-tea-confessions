@@ -82,11 +82,10 @@ const Header = ({ onPostClick }: HeaderProps) => {
             </Button>
             <Button
               onClick={onPostClick}
-              className="bg-primary hover:bg-primary/90 text-xs md:text-sm"
+              className="bg-primary hover:bg-primary/90 text-xs md:text-sm font-semibold"
               size="sm"
             >
-              <span className="hidden sm:inline">Post a Secret</span>
-              <span className="sm:hidden">✍️</span>
+              Post Secret
             </Button>
             {user && isAdmin && (
               <Button

@@ -58,20 +58,20 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onPostClick={() => setShowForm(true)} />
 
-      <main className="container px-3 py-6 md:px-6 md:py-12">
-        <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
-          <div className="text-center space-y-2 md:space-y-3 mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display">Recent Secrets</h2>
+      <main className="container px-3 py-4 md:px-6 md:py-8">
+        <div className="mx-auto max-w-3xl space-y-4 md:space-y-6">
+          <div className="text-center space-y-1 md:space-y-2 mb-6 md:mb-8">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold font-display">Recent Secrets</h2>
           </div>
 
           {loading ? (
-            <div className="text-center text-muted-foreground">Loading...</div>
+            <div className="text-center text-muted-foreground text-sm">Loading...</div>
           ) : confessions.length === 0 ? (
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground text-sm">
               No confessions yet. Be the first to share!
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {confessions.map((confession) => (
                 <ConfessionCard
                   key={confession.id}

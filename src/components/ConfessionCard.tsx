@@ -168,22 +168,26 @@ const ConfessionCard = ({
       const shareUrl = `${window.location.origin}/confession/${id}`;
       const shareData = {
         title: title,
-        text: `${title}\n\n${content.substring(0, 100)}...`,
+        text: `Check out this confession: ${title}`,
         url: shareUrl,
       };
 
-      if (navigator.share) {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
+        toast({ title: "Shared successfully!" });
       } else {
-        await navigator.clipboard.writeText(`${title}\n\n${content}\n\n${shareUrl}`);
-        toast({ title: "Copied to clipboard!" });
+        await navigator.clipboard.writeText(shareUrl);
+        toast({ 
+          title: "Link copied!", 
+          description: "Confession link copied to clipboard" 
+        });
       }
     } catch (error: any) {
       if (error.name !== 'AbortError') {
-        toast({
-          title: "Error sharing",
-          description: "Could not share this confession",
-          variant: "destructive",
+        await navigator.clipboard.writeText(`${window.location.origin}/confession/${id}`);
+        toast({ 
+          title: "Link copied!", 
+          description: "Confession link copied to clipboard" 
         });
       }
     }
@@ -195,9 +199,9 @@ const ConfessionCard = ({
   };
 
   return (
-    <Card className="p-6 bg-card border-border hover:border-primary/30 transition-all duration-300">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between text-sm">
+    <Card className="p-4 md:p-6 bg-card border-border hover:border-primary/30 transition-all duration-300">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-xs md:text-sm">
           <p className="text-muted-foreground italic">{author}</p>
           <p className="text-muted-foreground">
             {formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
@@ -205,71 +209,72 @@ const ConfessionCard = ({
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-3 font-mono text-center">{title}</h2>
-          <p className="text-muted-foreground leading-relaxed font-mono">{truncateContent(content)}</p>
-          <div className="flex justify-center mt-4">
+          <h2 className="text-base md:text-lg font-semibold mb-2 font-mono text-center">{title}</h2>
+          <p className="text-muted-foreground leading-relaxed font-mono text-sm md:text-base">{truncateContent(content)}</p>
+          <div className="flex justify-center mt-3">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => navigate(`/confession/${id}`)}
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-xs md:text-sm"
             >
               View Full Post
             </Button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-border">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between pt-3 border-t border-border">
+          <div className="flex items-center gap-1 md:gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleVote("upvote")}
-              className={`gap-2 transition-colors ${
+              className={`gap-1 transition-colors ${
                 userVote === "upvote" ? "text-green-500 hover:text-green-600" : "hover:text-green-500"
               }`}
             >
-              <ThumbsUp className="h-4 w-4" />
-              <span className="text-sm">{upvotes}</span>
+              <ThumbsUp className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm">{upvotes}</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleVote("downvote")}
-              className={`gap-2 transition-colors ${
+              className={`gap-1 transition-colors ${
                 userVote === "downvote" ? "text-red-500 hover:text-red-600" : "hover:text-red-500"
               }`}
             >
-              <ThumbsDown className="h-4 w-4" />
-              <span className="text-sm">{downvotes}</span>
+              <ThumbsDown className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm">{downvotes}</span>
             </Button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(`/confession/${id}`)}
-              className="gap-2 text-yellow-600 hover:text-yellow-700"
+              className="gap-1 text-yellow-600 hover:text-yellow-700"
             >
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-sm">{commentsList.length}</span>
+              <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm">{commentsList.length}</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleShare}
-              className="gap-2 hover:text-primary"
+              className="gap-1 hover:text-primary"
             >
-              <Share2 className="h-4 w-4" />
+              <Share2 className="h-3 w-3 md:h-4 md:w-4" />
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-2 hover:text-destructive"
+                  className="gap-1 hover:text-destructive"
                 >
-                  <Flag className="h-4 w-4" />
+                  <Flag className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
