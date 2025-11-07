@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, ThumbsDown, MessageCircle, Share2, Flag, ArrowLeft } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageCircle, Share2, Flag, ArrowLeft, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
+import * as htmlToImage from 'html-to-image';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +42,7 @@ const ConfessionDetail = () => {
   const [voteIdentifier, setVoteIdentifier] = useState<string>("");
   const [reportReason, setReportReason] = useState("");
   const { toast } = useToast();
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let identifier = localStorage.getItem("vote_identifier");
@@ -178,28 +180,46 @@ const ConfessionDetail = () => {
   };
 
   const handleShare = async () => {
-    try {
-      const shareUrl = window.location.href;
-      const shareData = {
-        title: confession?.title,
-        text: `${confession?.title}\n\n${confession?.content}`,
-        url: shareUrl,
-      };
+    const shareUrl = window.location.href;
+    const shareText = confession ? `Check out this confession: "${confession.title}"` : "Check out this confession!";
 
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(`${confession?.title}\n\n${confession?.content}\n\n${shareUrl}`);
-        toast({ title: "Copied to clipboard!" });
-      }
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        toast({
-          title: "Error sharing",
-          description: "Could not share this confession",
-          variant: "destructive",
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: confession?.title || "Confession",
+          text: shareText,
+          url: shareUrl,
         });
+        toast({ title: "Shared successfully!" });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error("Error sharing:", error);
+        }
       }
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Link copied to clipboard!" });
+    }
+  };
+
+  const handleShareCard = async () => {
+    if (!cardRef.current) return;
+    
+    try {
+      toast({ title: "Generating card..." });
+      const dataUrl = await htmlToImage.toPng(cardRef.current, {
+        quality: 1,
+        pixelRatio: 2,
+      });
+      
+      const link = document.createElement('a');
+      link.download = `confession-${id}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast({ title: "Card saved! Share it on Instagram!" });
+    } catch (error) {
+      console.error("Error generating card:", error);
+      toast({ title: "Failed to generate card", variant: "destructive" });
     }
   };
 
@@ -296,7 +316,7 @@ const ConfessionDetail = () => {
                 </Button>
               </div>
 
-              <div className="flex items-center gap-1 md:gap-2">
+               <div className="flex items-center gap-1 md:gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -304,6 +324,14 @@ const ConfessionDetail = () => {
                 >
                   <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
                   <span>{commentsList.length}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleShareCard}
+                  className="gap-1 md:gap-2 hover:text-primary"
+                >
+                  <Image className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -383,6 +411,37 @@ const ConfessionDetail = () => {
             </div>
           </div>
         </Card>
+
+        {/* Hidden card for image generation */}
+        <div className="fixed -left-[9999px] top-0">
+          <div
+            ref={cardRef}
+            className="w-[1080px] h-[1080px] bg-gradient-to-br from-primary/20 to-secondary/20 p-16 flex flex-col justify-center items-center"
+          >
+            <div className="bg-card rounded-3xl shadow-2xl p-12 max-w-[900px] w-full">
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h1 className="text-5xl font-bold mb-4 text-foreground">{confession.title}</h1>
+                  <p className="text-2xl text-muted-foreground leading-relaxed">{confession.content}</p>
+                </div>
+                <div className="flex justify-between items-center pt-8 border-t border-border">
+                  <span className="text-xl font-medium text-muted-foreground">{confession.author_name}</span>
+                  <div className="flex gap-8 text-xl text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      <ThumbsUp className="h-6 w-6" /> {upvotes}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <MessageCircle className="h-6 w-6" /> {commentsList.length}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-center pt-4">
+                  <p className="text-lg text-muted-foreground">RAIT Confession Tea</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
