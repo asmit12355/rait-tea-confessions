@@ -177,14 +177,26 @@ const ConfessionCard = ({
           url: shareUrl,
         });
         toast({ title: "Shared successfully!" });
+        return;
       } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          console.error("Error sharing:", error);
+        // If user cancels, don't show error
+        if ((error as Error).name === 'AbortError') {
+          return;
         }
+        // For other errors, fall through to clipboard
       }
-    } else {
+    }
+    
+    // Fallback to clipboard
+    try {
       await navigator.clipboard.writeText(shareUrl);
       toast({ title: "Link copied to clipboard!" });
+    } catch (error) {
+      toast({ 
+        title: "Could not share", 
+        description: "Please copy the URL manually",
+        variant: "destructive" 
+      });
     }
   };
 
