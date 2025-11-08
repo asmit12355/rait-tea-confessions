@@ -20,6 +20,7 @@ export type Database = {
           confession_id: string
           content: string
           created_at: string
+          device_info: string | null
           id: string
           ip_address: string | null
           user_id: string | null
@@ -29,6 +30,7 @@ export type Database = {
           confession_id: string
           content: string
           created_at?: string
+          device_info?: string | null
           id?: string
           ip_address?: string | null
           user_id?: string | null
@@ -38,6 +40,7 @@ export type Database = {
           confession_id?: string
           content?: string
           created_at?: string
+          device_info?: string | null
           id?: string
           ip_address?: string | null
           user_id?: string | null
@@ -56,6 +59,7 @@ export type Database = {
         Row: {
           confession_id: string
           created_at: string
+          device_info: string | null
           id: string
           ip_address: string | null
           reason: string
@@ -64,6 +68,7 @@ export type Database = {
         Insert: {
           confession_id: string
           created_at?: string
+          device_info?: string | null
           id?: string
           ip_address?: string | null
           reason: string
@@ -72,6 +77,7 @@ export type Database = {
         Update: {
           confession_id?: string
           created_at?: string
+          device_info?: string | null
           id?: string
           ip_address?: string | null
           reason?: string
@@ -127,6 +133,7 @@ export type Database = {
           author_name: string
           content: string
           created_at: string
+          device_info: string | null
           id: string
           ip_address: string | null
           title: string
@@ -137,6 +144,7 @@ export type Database = {
           author_name: string
           content: string
           created_at?: string
+          device_info?: string | null
           id?: string
           ip_address?: string | null
           title: string
@@ -147,6 +155,7 @@ export type Database = {
           author_name?: string
           content?: string
           created_at?: string
+          device_info?: string | null
           id?: string
           ip_address?: string | null
           title?: string

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import * as htmlToImage from 'html-to-image';
+import { getDeviceInfo } from "@/lib/deviceInfo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -148,10 +149,13 @@ const ConfessionCard = ({
     }
 
     try {
+      const deviceInfo = getDeviceInfo();
+      
       await supabase.from("confession_reports").insert({
         confession_id: id,
         reason: reportReason,
         reporter_identifier: voteIdentifier,
+        device_info: deviceInfo,
       });
 
       setReportReason("");

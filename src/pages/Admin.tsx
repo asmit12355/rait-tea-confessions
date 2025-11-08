@@ -16,6 +16,7 @@ interface Confession {
   title: string;
   content: string;
   ip_address?: string;
+  device_info?: string;
 }
 
 interface Report {
@@ -24,6 +25,7 @@ interface Report {
   reason: string;
   reporter_identifier: string;
   ip_address?: string;
+  device_info?: string;
   created_at: string;
   confessions?: {
     title: string;
@@ -197,6 +199,14 @@ const Admin = () => {
                                   </span>
                                 </>
                               )}
+                              {confession.device_info && (
+                                <>
+                                  <span className="hidden sm:inline">•</span>
+                                  <span className="font-mono text-[10px] md:text-xs bg-secondary px-2 py-1 rounded">
+                                    📱 {confession.device_info}
+                                  </span>
+                                </>
+                              )}
                             </div>
                             <h3 className="text-base md:text-xl font-semibold mb-2 font-mono">
                               {confession.title}
@@ -277,6 +287,14 @@ const Admin = () => {
                                     <span className="hidden sm:inline">•</span>
                                     <span className="font-mono text-[10px] md:text-xs bg-destructive/20 px-2 py-1 rounded">
                                       IP: {report.ip_address}
+                                    </span>
+                                  </>
+                                )}
+                                {report.device_info && (
+                                  <>
+                                    <span className="hidden sm:inline">•</span>
+                                    <span className="font-mono text-[10px] md:text-xs bg-destructive/20 px-2 py-1 rounded">
+                                      📱 {report.device_info}
                                     </span>
                                   </>
                                 )}
