@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Home, TrendingUp, Shield, LogOut } from "lucide-react";
+import { Menu, Home, TrendingUp, Shield, LogOut, Sun, Moon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "next-themes";
 import teaLogo from "@/assets/tea-logo.png";
 
 interface HeaderProps {
@@ -16,6 +17,7 @@ const Header = ({ onPostClick }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -108,10 +110,26 @@ const Header = ({ onPostClick }: HeaderProps) => {
                   Sign Out
                 </Button>
               )}
+              <Button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                variant="ghost"
+                size="sm"
+                className="px-2"
+              >
+                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
             </div>
 
             {/* Mobile Navigation */}
             <div className="flex md:hidden items-center gap-2">
+              <Button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                variant="ghost"
+                size="sm"
+                className="px-2"
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
               <Button
                 onClick={onPostClick}
                 className="bg-primary hover:bg-primary/90 text-xs font-semibold"
