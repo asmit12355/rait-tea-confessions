@@ -4,10 +4,12 @@ import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, AlertTriangle, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import AdminAnalytics from "@/components/AdminAnalytics";
 
 interface Confession {
   id: string;
@@ -38,6 +40,7 @@ const Admin = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedConfessions, setSelectedConfessions] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -140,6 +143,46 @@ const Admin = () => {
     }
   };
 
+  const toggleSelectConfession = (id: string) => {
+    const newSelected = new Set(selectedConfessions);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedConfessions(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedConfessions.size === confessions.length) {
+      setSelectedConfessions(new Set());
+    } else {
+      setSelectedConfessions(new Set(confessions.map((c) => c.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedConfessions.size === 0) return;
+
+    if (!confirm(`Delete ${selectedConfessions.size} selected confessions?`)) return;
+
+    const ids = Array.from(selectedConfessions);
+    const { error } = await supabase.from("confessions").delete().in("id", ids);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: `${selectedConfessions.size} confessions deleted` });
+      setSelectedConfessions(new Set());
+      loadConfessions();
+      loadReports();
+    }
+  };
+
   if (!isAdmin) {
     return null;
   }
@@ -158,7 +201,7 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="confessions" className="space-y-4 md:space-y-6">
-            <TabsList className="grid w-full grid-cols-2 text-sm md:text-base">
+            <TabsList className="grid w-full grid-cols-3 text-sm md:text-base">
               <TabsTrigger value="confessions">
                 <span className="hidden sm:inline">Confessions ({confessions.length})</span>
                 <span className="sm:hidden">📝 ({confessions.length})</span>
@@ -166,6 +209,10 @@ const Admin = () => {
               <TabsTrigger value="reports">
                 <span className="hidden sm:inline">Reports ({reports.length})</span>
                 <span className="sm:hidden">🚩 ({reports.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics">
+                <span className="hidden sm:inline">Analytics</span>
+                <span className="sm:hidden">📊</span>
               </TabsTrigger>
             </TabsList>
 
@@ -178,11 +225,45 @@ const Admin = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Bulk Actions */}
+                  <Card className="p-3 md:p-4 bg-card border-border">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={selectedConfessions.size === confessions.length}
+                          onCheckedChange={toggleSelectAll}
+                        />
+                        <span className="text-sm">
+                          {selectedConfessions.size > 0
+                            ? `${selectedConfessions.size} selected`
+                            : "Select All"}
+                        </span>
+                      </div>
+                      {selectedConfessions.size > 0 && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleBulkDelete}
+                          className="text-xs md:text-sm"
+                        >
+                          <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                          Delete Selected ({selectedConfessions.size})
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+
                   {confessions.map((confession) => (
                     <Card key={confession.id} className="p-3 md:p-6 bg-card border-border">
                       <div className="space-y-3 md:space-y-4">
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                          <div className="flex-1">
+                          <div className="flex gap-3 flex-1">
+                            <Checkbox
+                              checked={selectedConfessions.has(confession.id)}
+                              onCheckedChange={() => toggleSelectConfession(confession.id)}
+                              className="mt-1"
+                            />
+                            <div className="flex-1">
                             <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-muted-foreground mb-2">
                               <span className="italic">{confession.author_name}</span>
                               <span>•</span>
@@ -214,8 +295,9 @@ const Admin = () => {
                             <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-mono line-clamp-3">
                               {confession.content}
                             </p>
+                            </div>
                           </div>
-                          <div className="flex gap-2 self-end md:self-start">
+                          <div className="flex gap-2 self-end md:self-start ml-auto">
                             <Button
                               variant="outline"
                               size="icon"
@@ -234,7 +316,7 @@ const Admin = () => {
                             </Button>
                           </div>
                         </div>
-                      </div>
+                        </div>
                     </Card>
                   ))}
                 </div>
@@ -336,6 +418,10 @@ const Admin = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-4">
+              <AdminAnalytics />
             </TabsContent>
           </Tabs>
         </div>
