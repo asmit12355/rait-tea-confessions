@@ -10,6 +10,7 @@ interface Confession {
   created_at: string;
   title: string;
   content: string;
+  slug?: string;
 }
 
 const Index = () => {
@@ -80,6 +81,7 @@ const Index = () => {
                   timestamp={confession.created_at}
                   title={confession.title}
                   content={confession.content}
+                  slug={confession.slug}
                 />
               ))}
             </div>

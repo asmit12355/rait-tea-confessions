@@ -11,6 +11,7 @@ interface Confession {
   title: string;
   content: string;
   score?: number;
+  slug?: string;
 }
 
 const Trending = () => {
@@ -126,6 +127,7 @@ const Trending = () => {
                     timestamp={confession.created_at}
                     title={confession.title}
                     content={confession.content}
+                    slug={confession.slug}
                   />
                 </div>
               ))}

@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Header from "@/components/Header";
+import { SEOHead } from "@/components/PostConfessionDialog";
 
 interface Confession {
   id: string;
@@ -30,7 +31,7 @@ interface Confession {
 }
 
 const ConfessionDetail = () => {
-  const { id } = useParams();
+  const { id: slugOrId } = useParams();
   const navigate = useNavigate();
   const [confession, setConfession] = useState<Confession | null>(null);
   const [upvotes, setUpvotes] = useState(0);
@@ -52,17 +53,24 @@ const ConfessionDetail = () => {
     }
     setVoteIdentifier(identifier);
     
-    loadConfession();
-    loadVotes();
-    loadComments();
-    checkUserVote(identifier);
-  }, [id]);
+    if (slugOrId) {
+      loadConfession();
+      loadVotes();
+      loadComments();
+      checkUserVote(identifier);
+    }
+  }, [slugOrId]);
 
   const loadConfession = async () => {
+    if (!slugOrId) return;
+    
+    // Check if it's a UUID (ID) or a slug
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId);
+    
     const { data, error } = await supabase
       .from("confessions")
       .select("*")
-      .eq("id", id)
+      .eq(isUUID ? "id" : "slug", slugOrId)
       .maybeSingle();
 
     if (error || !data) {
@@ -79,10 +87,12 @@ const ConfessionDetail = () => {
   };
 
   const loadVotes = async () => {
+    if (!confession?.id) return;
+    
     const { data } = await supabase
       .from("confession_votes")
       .select("vote_type")
-      .eq("confession_id", id);
+      .eq("confession_id", confession.id);
 
     if (data) {
       setUpvotes(data.filter((v) => v.vote_type === "upvote").length);
@@ -91,20 +101,24 @@ const ConfessionDetail = () => {
   };
 
   const loadComments = async () => {
+    if (!confession?.id) return;
+    
     const { data } = await supabase
       .from("confession_comments")
       .select("*")
-      .eq("confession_id", id)
+      .eq("confession_id", confession.id)
       .order("created_at", { ascending: false });
 
     setCommentsList(data || []);
   };
 
   const checkUserVote = async (identifier: string) => {
+    if (!confession?.id) return;
+    
     const { data } = await supabase
       .from("confession_votes")
       .select("vote_type")
-      .eq("confession_id", id)
+      .eq("confession_id", confession.id)
       .eq("vote_identifier", identifier)
       .maybeSingle();
 
@@ -114,19 +128,21 @@ const ConfessionDetail = () => {
   };
 
   const handleVote = async (type: "upvote" | "downvote") => {
+    if (!confession?.id) return;
+    
     try {
       if (userVote === type) {
         await supabase
           .from("confession_votes")
           .delete()
-          .eq("confession_id", id)
+          .eq("confession_id", confession.id)
           .eq("vote_identifier", voteIdentifier);
         setUserVote(null);
       } else {
         const { data: existing } = await supabase
           .from("confession_votes")
           .select("id")
-          .eq("confession_id", id)
+          .eq("confession_id", confession.id)
           .eq("vote_identifier", voteIdentifier)
           .maybeSingle();
 
@@ -137,7 +153,7 @@ const ConfessionDetail = () => {
             .eq("id", existing.id);
         } else {
           await supabase.from("confession_votes").insert({
-            confession_id: id,
+            confession_id: confession.id,
             user_id: null,
             vote_type: type,
             vote_identifier: voteIdentifier,
@@ -156,11 +172,11 @@ const ConfessionDetail = () => {
   };
 
   const handleComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !confession?.id) return;
 
     try {
       await supabase.from("confession_comments").insert({
-        confession_id: id,
+        confession_id: confession.id,
         user_id: null,
         author_name: commentPseudonym || "Anonymous",
         content: newComment,
@@ -225,7 +241,7 @@ const ConfessionDetail = () => {
       });
       
       const link = document.createElement('a');
-      link.download = `confession-${id}.png`;
+      link.download = `confession-${confession?.id}.png`;
       link.href = dataUrl;
       link.click();
       toast({ title: "Card saved! Share it on Instagram!" });
@@ -236,7 +252,7 @@ const ConfessionDetail = () => {
   };
 
   const handleReport = async () => {
-    if (!reportReason.trim()) {
+    if (!reportReason.trim() || !confession?.id) {
       toast({
         title: "Error",
         description: "Please provide a reason for reporting",
@@ -247,7 +263,7 @@ const ConfessionDetail = () => {
 
     try {
       await supabase.from("confession_reports").insert({
-        confession_id: id,
+        confession_id: confession.id,
         reason: reportReason,
         reporter_identifier: voteIdentifier,
       });
@@ -264,9 +280,16 @@ const ConfessionDetail = () => {
   };
 
   if (!confession) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header onPostClick={() => navigate("/")} />
+  return (
+    <div className="min-h-screen bg-background">
+      {confession && (
+        <SEOHead
+          title={confession.title}
+          description={confession.content.substring(0, 160)}
+          url={window.location.href}
+        />
+      )}
+      <Header onPostClick={() => navigate("/")} />
         <div className="container py-8">
           <p className="text-center text-muted-foreground">Loading...</p>
         </div>

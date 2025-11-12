@@ -136,6 +136,7 @@ export type Database = {
           device_info: string | null
           id: string
           ip_address: string | null
+          slug: string | null
           title: string
           updated_at: string
           user_id: string | null
@@ -147,6 +148,7 @@ export type Database = {
           device_info?: string | null
           id?: string
           ip_address?: string | null
+          slug?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
@@ -158,6 +160,7 @@ export type Database = {
           device_info?: string | null
           id?: string
           ip_address?: string | null
+          slug?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null

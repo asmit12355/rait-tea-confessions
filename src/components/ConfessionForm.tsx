@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
 import { getDeviceInfo } from "@/lib/deviceInfo";
+import { getClientIP, createSlug } from "@/lib/utils";
 
 interface ConfessionFormProps {
   onClose: () => void;
@@ -28,6 +29,8 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
       const randomNumber = Math.floor(Math.random() * 10000);
       const authorName = pseudonym.trim() || `Anonymous User #${randomNumber}`;
       const deviceInfo = getDeviceInfo();
+      const ipAddress = await getClientIP();
+      const slug = createSlug(title);
       
       // Anonymous posting - no login required
       const { error } = await supabase.from("confessions").insert({
@@ -36,6 +39,8 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
         title,
         content,
         device_info: deviceInfo,
+        ip_address: ipAddress,
+        slug: slug,
       });
 
       if (error) throw error;

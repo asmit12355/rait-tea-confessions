@@ -27,6 +27,7 @@ interface ConfessionCardProps {
   timestamp: string;
   title: string;
   content: string;
+  slug?: string;
 }
 
 const ConfessionCard = ({
@@ -35,6 +36,7 @@ const ConfessionCard = ({
   timestamp,
   title,
   content,
+  slug,
 }: ConfessionCardProps) => {
   const navigate = useNavigate();
   const [upvotes, setUpvotes] = useState(0);
@@ -170,7 +172,8 @@ const ConfessionCard = ({
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/confession/${id}`;
+    const confessionUrl = slug ? `/confession/${slug}` : `/confession/${id}`;
+    const shareUrl = `${window.location.origin}${confessionUrl}`;
     const shareText = `Check out this confession: "${title}"`;
 
     if (navigator.share) {
@@ -247,7 +250,7 @@ const ConfessionCard = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/confession/${id}`)}
+              onClick={() => navigate(slug ? `/confession/${slug}` : `/confession/${id}`)}
               className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-xs md:text-sm"
             >
               View Full Post
@@ -285,7 +288,7 @@ const ConfessionCard = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(`/confession/${id}`)}
+              onClick={() => navigate(slug ? `/confession/${slug}` : `/confession/${id}`)}
               className="gap-1 text-yellow-600 hover:text-yellow-700"
             >
               <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
