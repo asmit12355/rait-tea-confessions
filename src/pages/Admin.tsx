@@ -7,9 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, AlertTriangle, Eye } from "lucide-react";
+import { Trash2, AlertTriangle, Eye, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import AdminAnalytics from "@/components/AdminAnalytics";
+import {
+  exportToCSV,
+  formatConfessionsForExport,
+  formatReportsForExport,
+} from "@/lib/exportUtils";
 
 interface Confession {
   id: string;
@@ -250,6 +255,15 @@ const Admin = () => {
                           Delete Selected ({selectedConfessions.size})
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => exportToCSV(formatConfessionsForExport(confessions), "confessions")}
+                        className="text-xs md:text-sm ml-auto"
+                      >
+                        <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        Export CSV
+                      </Button>
                     </div>
                   </Card>
 
