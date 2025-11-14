@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ConfessionCard from "@/components/ConfessionCard";
 import ConfessionForm from "@/components/ConfessionForm";
+import TagFilter from "@/components/TagFilter";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Confession {
@@ -12,17 +13,20 @@ interface Confession {
   content: string;
   score?: number;
   slug?: string;
+  tags?: string[];
 }
 
 const Trending = () => {
   const [confessions, setConfessions] = useState<Confession[]>([]);
+  const [filteredConfessions, setFilteredConfessions] = useState<Confession[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   useEffect(() => {
     loadTrendingConfessions();
 
-    // Subscribe to realtime updates
     const channel = supabase
       .channel("trending-confessions-channel")
       .on(
@@ -54,40 +58,49 @@ const Trending = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (selectedTags.length === 0) {
+      setFilteredConfessions(confessions);
+    } else {
+      setFilteredConfessions(confessions.filter((c) =>
+        c.tags?.some((tag) => selectedTags.includes(tag))
+      ));
+    }
+  }, [confessions, selectedTags]);
+
   const loadTrendingConfessions = async () => {
     setLoading(true);
     
-    // Get all confessions
-    const { data: confessionsData, error: confessionsError } = await supabase
+    const { data: confessionsData, error } = await supabase
       .from("confessions")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (confessionsError || !confessionsData) {
+    if (error || !confessionsData) {
       setLoading(false);
       return;
     }
 
-    // Get all votes
     const { data: votesData } = await supabase
       .from("confession_votes")
       .select("confession_id, vote_type");
 
-    // Calculate scores (upvotes - downvotes)
     const confessionsWithScores = confessionsData.map((confession) => {
       const votes = votesData?.filter((v) => v.confession_id === confession.id) || [];
       const upvotes = votes.filter((v) => v.vote_type === "upvote").length;
       const downvotes = votes.filter((v) => v.vote_type === "downvote").length;
-      return {
-        ...confession,
-        score: upvotes - downvotes,
-      };
+      return { ...confession, score: upvotes - downvotes };
     });
 
-    // Sort by score
     confessionsWithScores.sort((a, b) => (b.score || 0) - (a.score || 0));
-
     setConfessions(confessionsWithScores);
+
+    const tags = new Set<string>();
+    confessionsWithScores.forEach((c) => {
+      if (c.tags) c.tags.forEach((tag: string) => tags.add(tag));
+    });
+    setAvailableTags(Array.from(tags).sort());
+    
     setLoading(false);
   };
 
@@ -104,15 +117,24 @@ const Trending = () => {
             </p>
           </div>
 
+          <TagFilter
+            availableTags={availableTags}
+            selectedTags={selectedTags}
+            onTagToggle={(tag) => setSelectedTags((prev) =>
+              prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+            )}
+            onClearAll={() => setSelectedTags([])}
+          />
+
           {loading ? (
             <div className="text-center text-muted-foreground">Loading...</div>
-          ) : confessions.length === 0 ? (
+          ) : filteredConfessions.length === 0 ? (
             <div className="text-center text-muted-foreground">
-              No confessions yet. Be the first to share!
+              {selectedTags.length > 0 ? "No confessions found with selected tags." : "No confessions yet."}
             </div>
           ) : (
             <div className="space-y-6">
-              {confessions.map((confession, index) => (
+              {filteredConfessions.map((confession, index) => (
                 <div key={confession.id} className="relative">
                   {index < 3 && (
                     <div className="absolute -left-4 md:-left-8 top-4 md:top-6 text-xl md:text-2xl">
@@ -128,6 +150,7 @@ const Trending = () => {
                     title={confession.title}
                     content={confession.content}
                     slug={confession.slug}
+                    tags={confession.tags}
                   />
                 </div>
               ))}

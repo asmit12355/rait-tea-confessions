@@ -137,6 +137,7 @@ export type Database = {
           id: string
           ip_address: string | null
           slug: string | null
+          tags: string[] | null
           title: string
           updated_at: string
           user_id: string | null
@@ -149,6 +150,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           slug?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
           user_id?: string | null
@@ -161,6 +163,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           slug?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string | null

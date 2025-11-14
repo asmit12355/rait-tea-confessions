@@ -18,6 +18,8 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
   const [pseudonym, setPseudonym] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -41,6 +43,7 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
         device_info: deviceInfo,
         ip_address: ipAddress,
         slug: slug,
+        tags: tags,
       });
 
       if (error) throw error;
@@ -110,6 +113,64 @@ const ConfessionForm = ({ onClose, onSuccess }: ConfessionFormProps) => {
                 rows={6}
                 className="bg-secondary border-border resize-none text-sm md:text-base"
               />
+            </div>
+
+            <div className="space-y-1 md:space-y-2">
+              <Label htmlFor="tags" className="text-sm md:text-base">Tags (Optional)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="tags"
+                  placeholder="e.g., academic, personal, funny"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const tag = tagInput.trim().toLowerCase();
+                      if (tag && !tags.includes(tag) && tags.length < 5) {
+                        setTags([...tags, tag]);
+                        setTagInput("");
+                      }
+                    }
+                  }}
+                  className="bg-secondary border-border text-sm md:text-base"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const tag = tagInput.trim().toLowerCase();
+                    if (tag && !tags.includes(tag) && tags.length < 5) {
+                      setTags([...tags, tag]);
+                      setTagInput("");
+                    }
+                  }}
+                  className="text-xs md:text-sm"
+                >
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded-md"
+                  >
+                    #{tag}
+                    <button
+                      type="button"
+                      onClick={() => setTags(tags.filter((t) => t !== tag))}
+                      className="hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Add up to 5 tags. Press Enter or click Add.
+              </p>
             </div>
 
             <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-3">
